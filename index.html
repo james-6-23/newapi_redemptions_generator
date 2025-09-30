@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewAPI兑换码生成器</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 25%, #2c5364 50%, #1e3c72 75%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+            animation: gradientShift 25s ease infinite;
+            background-size: 400% 400%;
+            position: relative;
+            overflow-x: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(66, 153, 225, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(72, 187, 120, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(99, 179, 237, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            animation: float 15s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow:
+                0 30px 90px rgba(0, 0, 0, 0.25),
+                inset 0 1px 1px rgba(255, 255, 255, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+            padding: 40px 50px;
+            animation: slideUp 0.8s ease-out;
+            position: relative;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 30px;
+            padding: 2px;
+            background: linear-gradient(135deg,
+                    rgba(255, 255, 255, 0.4) 0%,
+                    rgba(255, 255, 255, 0.1) 50%,
+                    rgba(255, 255, 255, 0.4) 100%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        h1 {
+            color: #ffffff;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 42px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            text-shadow:
+                0 2px 10px rgba(0, 0, 0, 0.3),
+                0 4px 20px rgba(66, 153, 225, 0.4),
+                0 0 60px rgba(99, 179, 237, 0.2);
+            animation: titleGlow 3s ease-in-out infinite;
+            line-height: 1.2;
+        }
+
+        @keyframes titleGlow {
+
+            0%,
+            100% {
+                text-shadow:
+                    0 2px 10px rgba(0, 0, 0, 0.3),
+                    0 4px 20px rgba(66, 153, 225, 0.4),
+                    0 0 60px rgba(99, 179, 237, 0.2);
+            }
+
+            50% {
+                text-shadow:
+                    0 2px 10px rgba(0, 0, 0, 0.3),
+                    0 4px 30px rgba(66, 153, 225, 0.6),
+                    0 0 80px rgba(99, 179, 237, 0.3);
+            }
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            margin-bottom: 30px;
+            font-weight: 400;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            letter-spacing: 0.5px;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: 600;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            line-height: 1.4;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="datetime-local"],
+        textarea {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 14px;
+            font-size: 15px;
+            font-family: 'Noto Sans SC', sans-serif;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            color: #1a202c;
+            font-weight: 500;
+        }
+
+        input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.2);
+            cursor: pointer;
+        }
+
+        input[type="text"]::placeholder,
+        input[type="number"]::placeholder,
+        input[type="datetime-local"]::placeholder,
+        textarea::placeholder {
+            color: rgba(0, 0, 0, 0.4);
+        }
+
+        input[type="text"]:hover,
+        input[type="number"]:hover,
+        input[type="datetime-local"]:hover,
+        textarea:hover {
+            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.35);
+            box-shadow: 0 8px 32px rgba(66, 153, 225, 0.2);
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        input[type="datetime-local"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.45);
+            box-shadow: 0 12px 40px rgba(66, 153, 225, 0.3), 0 0 0 4px rgba(99, 179, 237, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .input-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 12px;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            font-size: 15px;
+            cursor: pointer;
+            padding: 12px 20px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            color: rgba(0, 0, 0, 0.8);
+        }
+
+        .radio-group label:hover {
+            background: rgba(255, 255, 255, 0.35);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px rgba(66, 153, 225, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .radio-group input[type="radio"]:checked+span {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .radio-group label:has(input[type="radio"]:checked) {
+            background: rgba(66, 153, 225, 0.7);
+            backdrop-filter: blur(15px);
+            border-color: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 12px 40px rgba(66, 153, 225, 0.4);
+        }
+
+        .radio-group input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #ffffff;
+        }
+
+        .quota-section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .quota-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .quota-range {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .info-box {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(15px);
+            border-left: 4px solid rgba(72, 187, 120, 0.8);
+            padding: 14px 20px;
+            border-radius: 14px;
+            margin-bottom: 25px;
+            font-size: 15px;
+            color: rgba(0, 0, 0, 0.85);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 8px 32px rgba(66, 153, 225, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            line-height: 1.6;
+        }
+
+        .info-box::before {
+            content: "💡";
+            font-size: 22px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+            flex-shrink: 0;
+        }
+
+        .info-box code {
+            background: rgba(0, 0, 0, 0.15);
+            color: rgba(0, 0, 0, 0.9);
+            font-weight: 600;
+        }
+
+        button {
+            background: linear-gradient(135deg, rgba(66, 153, 225, 0.85) 0%, rgba(49, 130, 206, 0.85) 100%);
+            backdrop-filter: blur(10px);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            padding: 13px 28px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: 'Noto Sans SC', sans-serif;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 24px rgba(66, 153, 225, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 36px rgba(66, 153, 225, 0.6);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        button:active {
+            transform: translateY(-1px) scale(0.98);
+            box-shadow: 0 6px 20px rgba(66, 153, 225, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, rgba(72, 187, 120, 0.85) 0%, rgba(56, 161, 105, 0.85) 100%);
+            box-shadow: 0 8px 24px rgba(72, 187, 120, 0.4);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 12px 36px rgba(72, 187, 120, 0.5);
+        }
+
+        .btn-secondary:active {
+            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+        }
+
+        .btn-group {
+            margin-top: 25px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, rgba(237, 137, 54, 0.85) 0%, rgba(214, 88, 86, 0.85) 100%);
+            box-shadow: 0 8px 24px rgba(237, 137, 54, 0.4);
+        }
+
+        .btn-download:hover {
+            box-shadow: 0 12px 36px rgba(237, 137, 54, 0.5);
+        }
+
+        .btn-download:active {
+            box-shadow: 0 6px 20px rgba(237, 137, 54, 0.4);
+        }
+
+        .btn-copy-keys {
+            background: linear-gradient(135deg, rgba(159, 122, 234, 0.85) 0%, rgba(130, 103, 216, 0.85) 100%);
+            box-shadow: 0 8px 24px rgba(159, 122, 234, 0.4);
+        }
+
+        .btn-copy-keys:hover {
+            box-shadow: 0 12px 36px rgba(159, 122, 234, 0.5);
+        }
+
+        .btn-copy-keys:active {
+            box-shadow: 0 6px 20px rgba(159, 122, 234, 0.4);
+        }
+
+        .btn-expire-preset {
+            background: linear-gradient(135deg, rgba(99, 179, 237, 0.7) 0%, rgba(66, 153, 225, 0.7) 100%);
+            backdrop-filter: blur(10px);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'Noto Sans SC', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+        }
+
+        .btn-expire-preset:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 6px 20px rgba(66, 153, 225, 0.5);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .btn-expire-preset:active {
+            transform: translateY(0) scale(0.98);
+            box-shadow: 0 2px 8px rgba(66, 153, 225, 0.3);
+        }
+
+        .output-area {
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        textarea {
+            min-height: 240px;
+            font-family: 'JetBrains Mono', 'SF Mono', 'Monaco', 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.8;
+            resize: vertical;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            font-variant-ligatures: common-ligatures;
+        }
+
+        .help-text {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.75);
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 400;
+            line-height: 1.5;
+        }
+
+        .help-text::before {
+            content: "ℹ️";
+            font-size: 12px;
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+            flex-shrink: 0;
+        }
+
+        /* 代码字体样式 */
+        .code-text,
+        code,
+        kbd {
+            font-family: 'JetBrains Mono', 'SF Mono', 'Monaco', 'Consolas', monospace;
+            font-size: 0.95em;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .alert {
+            padding: 14px 20px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            animation: slideDown 0.4s ease;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .alert.success {
+            background: rgba(195, 230, 203, 0.85);
+            color: #155724;
+            box-shadow: 0 8px 24px rgba(21, 87, 36, 0.2);
+        }
+
+        .alert.success::before {
+            content: "✓";
+            font-size: 18px;
+            font-weight: bold;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+
+        .alert.error {
+            background: rgba(245, 198, 203, 0.85);
+            color: #721c24;
+            box-shadow: 0 8px 24px rgba(114, 28, 36, 0.2);
+        }
+
+        .alert.error::before {
+            content: "⚠";
+            font-size: 18px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+
+        .alert.show {
+            display: flex;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper input:focus~.focus-indicator {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>NewAPI兑换码生成器</h1>
+        <div class="subtitle">快速生成批量兑换码 SQL 插入语句</div>
+
+        <div id="alert" class="alert success"></div>
+
+        <div class="info-box">
+            提示：<code>500000Token
+            </code> = <code>$1</code>
+        </div>
+
+        <div class="form-group">
+            <div class="input-row">
+                <div>
+                    <label for="name">Name</label>
+                    <input type="text" id="name" value="" placeholder="例如: RedeemCode-KYX">
+                    <div class="help-text">兑换码名称</div>
+                </div>
+                <div>
+                    <label for="count">生成数量</label>
+                    <input type="number" id="count" value="50" min="1" max="1000" placeholder="1-1000">
+                    <div class="help-text">批量生成条数</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="keyPrefix">Key前缀</label>
+            <input type="text" id="keyPrefix" value="" placeholder="例如: NK, API, CODE" maxlength="12"
+                oninput="updateKeyPreview()">
+            <div class="help-text">
+                Key总长度固定 <code>32字符</code>，当前分配: 前缀(<code id="prefixLen">2</code>) + 随机数(<code id="randomLen">18</code>)
+                + 时间戳(8) + 计数器(4)
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>额度模式</label>
+            <div class="radio-group">
+                <label>
+                    <input type="radio" name="quotaMode" value="fixed" checked onchange="toggleQuotaMode()">
+                    <span>固定额度</span>
+                </label>
+                <label>
+                    <input type="radio" name="quotaMode" value="random" onchange="toggleQuotaMode()">
+                    <span>随机额度</span>
+                </label>
+            </div>
+        </div>
+
+        <div id="fixedQuotaSection" class="form-group quota-section active">
+            <label for="fixedAmount">固定额度（$）</label>
+            <input type="number" id="fixedAmount" value="1" step="5" min="0" placeholder="例如: 1">
+            <div class="help-text"><code>$1</code> = <code>500000Token</code></div>
+        </div>
+
+        <div id="randomQuotaSection" class="form-group quota-section">
+            <label>随机额度区间（$）</label>
+            <div class="quota-range">
+                <div>
+                    <input type="number" id="minAmount" value="5" step="5" min="0" placeholder="最小值">
+                    <div class="help-text">最小额度（$）</div>
+                </div>
+                <div>
+                    <input type="number" id="maxAmount" value="10" step="5" min="0" placeholder="最大值">
+                    <div class="help-text">最大额度（$）</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>过期时间</label>
+            <div class="radio-group">
+                <label>
+                    <input type="radio" name="expireMode" value="never" checked onchange="toggleExpireMode()">
+                    <span>永不过期</span>
+                </label>
+                <label>
+                    <input type="radio" name="expireMode" value="days" onchange="toggleExpireMode()">
+                    <span>自定义天数</span>
+                </label>
+                <label>
+                    <input type="radio" name="expireMode" value="date" onchange="toggleExpireMode()">
+                    <span>指定日期</span>
+                </label>
+            </div>
+        </div>
+
+        <div id="daysExpireSection" class="form-group quota-section">
+            <label for="expireDays">过期天数</label>
+            <div class="input-row">
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button type="button" class="btn-expire-preset" onclick="setExpireDays(7)">7天</button>
+                    <button type="button" class="btn-expire-preset" onclick="setExpireDays(30)">30天</button>
+                    <button type="button" class="btn-expire-preset" onclick="setExpireDays(90)">90天</button>
+                    <button type="button" class="btn-expire-preset" onclick="setExpireDays(180)">180天</button>
+                    <button type="button" class="btn-expire-preset" onclick="setExpireDays(365)">1年</button>
+                </div>
+            </div>
+            <input type="number" id="expireDays" value="30" min="1" placeholder="输入天数">
+            <div class="help-text">兑换码将在 <code id="expireDaysPreview">30</code> 天后过期</div>
+        </div>
+
+        <div id="dateExpireSection" class="form-group quota-section">
+            <label for="expireDate">过期日期</label>
+            <input type="datetime-local" id="expireDate" placeholder="选择过期时间">
+            <div class="help-text">选择具体的过期时间点</div>
+        </div>
+
+        <div class="btn-group">
+            <button onclick="generateSQL()">生成SQL语句</button>
+            <button class="btn-secondary" onclick="copyToClipboard()">复制SQL语句</button>
+            <button class="btn-copy-keys" onclick="copyKeys()">复制Keys</button>
+            <button class="btn-download" onclick="downloadKeys()">下载Keys到文件</button>
+        </div>
+
+        <div class="output-area">
+            <div class="form-group">
+                <label for="output">生成的SQL语句</label>
+                <textarea id="output" readonly placeholder="点击" 生成SQL语句"按钮生成..."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let generatedKeys = [];
+
+        /**
+         * 混合增强方案 - 三重唯一性保障（固定32位长度）
+         * 总长度固定为 32 字符，根据前缀长度动态分配
+         * 1. 前缀：用户自定义（建议2-4字符）
+         * 2. 随机数：剩余长度 - 12（加密级）
+         * 3. 时间戳：8字符（36进制，覆盖约8300年）
+         * 4. 计数器：4字符（36进制，同毫秒内167万组合）
+         */
+        function generateRandomKey(prefix = '', targetLength = 32) {
+            const prefixLength = prefix.length;
+
+            // 为时间戳和计数器保留固定长度
+            const timestampLength = 8;  // 36进制时间戳
+            const counterLength = 4;     // 36进制计数器
+
+            // 计算随机数部分的长度
+            const randomLength = targetLength - prefixLength - timestampLength - counterLength;
+
+            if (randomLength < 8) {
+                console.warn(`前缀过长！建议前缀不超过 ${targetLength - timestampLength - counterLength - 8} 字符`);
+            }
+
+            // 1. 使用crypto.getRandomValues生成加密级真随机数
+            const actualRandomLength = Math.max(8, randomLength); // 至少8位
+            const randomBytes = new Uint8Array(Math.ceil(actualRandomLength / 2));
+            crypto.getRandomValues(randomBytes);
+            const randomPart = Array.from(randomBytes)
+                .map(b => b.toString(36).padStart(2, '0'))
+                .join('')
+                .substring(0, actualRandomLength);
+
+            // 2. 毫秒级时间戳（36进制）
+            const timestamp = Date.now();
+            const timestampBase36 = timestamp.toString(36).padStart(timestampLength, '0').substring(0, timestampLength);
+
+            // 3. 性能计数器（36进制，4位）
+            const perfCounter = Math.floor(performance.now() * 1000) % 1679616; // 36^4
+            const counterBase36 = perfCounter.toString(36).padStart(counterLength, '0');
+
+            // 组合并确保总长度为32
+            const key = `${prefix}${randomPart}${timestampBase36}${counterBase36}`;
+            return key.substring(0, targetLength).padEnd(targetLength, '0');
+        }
+
+        function toggleQuotaMode() {
+            const mode = document.querySelector('input[name="quotaMode"]:checked').value;
+            const fixedSection = document.getElementById('fixedQuotaSection');
+            const randomSection = document.getElementById('randomQuotaSection');
+
+            if (mode === 'fixed') {
+                fixedSection.classList.add('active');
+                randomSection.classList.remove('active');
+            } else {
+                fixedSection.classList.remove('active');
+                randomSection.classList.add('active');
+            }
+        }
+
+        function toggleExpireMode() {
+            const mode = document.querySelector('input[name="expireMode"]:checked').value;
+            const daysSection = document.getElementById('daysExpireSection');
+            const dateSection = document.getElementById('dateExpireSection');
+
+            daysSection.classList.remove('active');
+            dateSection.classList.remove('active');
+
+            if (mode === 'days') {
+                daysSection.classList.add('active');
+            } else if (mode === 'date') {
+                dateSection.classList.add('active');
+            }
+        }
+
+        function setExpireDays(days) {
+            document.getElementById('expireDays').value = days;
+            updateExpireDaysPreview();
+        }
+
+        function updateExpireDaysPreview() {
+            const days = document.getElementById('expireDays').value;
+            document.getElementById('expireDaysPreview').textContent = days || '0';
+        }
+
+        function updateKeyPreview() {
+            const prefix = document.getElementById('keyPrefix').value;
+            const prefixLen = prefix.length;
+            const randomLen = Math.max(8, 32 - prefixLen - 8 - 4); // 最少8位随机数
+
+            document.getElementById('prefixLen').textContent = prefixLen;
+            document.getElementById('randomLen').textContent = randomLen;
+
+            // 如果前缀过长，显示警告
+            if (prefixLen > 12) {
+                showAlert('前缀建议不超过12字符，以保证足够的随机性', 'error');
+            }
+        }
+
+        // 监听输入框变化，实时更新预览
+        document.addEventListener('DOMContentLoaded', function () {
+            const expireDaysInput = document.getElementById('expireDays');
+            if (expireDaysInput) {
+                expireDaysInput.addEventListener('input', updateExpireDaysPreview);
+            }
+
+            // 初始化 key 预览
+            updateKeyPreview();
+        });
+
+        function amountToQuota(amount) {
+            return Math.round(amount * 500000);
+        }
+
+        function getRandomAmount(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        function generateSQL() {
+            const name = document.getElementById('name').value.trim();
+            const keyPrefix = document.getElementById('keyPrefix').value.trim();
+            const count = parseInt(document.getElementById('count').value);
+            const userId = 1;
+            const mode = document.querySelector('input[name="quotaMode"]:checked').value;
+            const expireMode = document.querySelector('input[name="expireMode"]:checked').value;
+
+            if (!name || !count) {
+                showAlert('请填写所有必填字段', 'error');
+                return;
+            }
+
+            if (count < 1 || count > 1000) {
+                showAlert('生成数量必须在1-1000之间', 'error');
+                return;
+            }
+
+            let minAmount, maxAmount, fixedQuota;
+
+            if (mode === 'fixed') {
+                const fixedAmount = parseFloat(document.getElementById('fixedAmount').value);
+                if (isNaN(fixedAmount) || fixedAmount < 0) {
+                    showAlert('请输入有效的固定额度', 'error');
+                    return;
+                }
+                fixedQuota = amountToQuota(fixedAmount);
+            } else {
+                minAmount = parseFloat(document.getElementById('minAmount').value);
+                maxAmount = parseFloat(document.getElementById('maxAmount').value);
+
+                if (isNaN(minAmount) || isNaN(maxAmount) || minAmount < 0 || maxAmount < 0) {
+                    showAlert('请输入有效的额度区间', 'error');
+                    return;
+                }
+
+                if (minAmount > maxAmount) {
+                    showAlert('最小额度不能大于最大额度', 'error');
+                    return;
+                }
+            }
+
+            // 计算过期时间
+            let expireTime = 0;
+            let expireDesc = '永不过期';
+
+            if (expireMode === 'days') {
+                const days = parseInt(document.getElementById('expireDays').value);
+                if (isNaN(days) || days < 1) {
+                    showAlert('请输入有效的过期天数', 'error');
+                    return;
+                }
+                expireTime = Math.floor(Date.now() / 1000) + (days * 24 * 60 * 60);
+                expireDesc = `${days}天后过期`;
+            } else if (expireMode === 'date') {
+                const dateStr = document.getElementById('expireDate').value;
+                if (!dateStr) {
+                    showAlert('请选择过期日期', 'error');
+                    return;
+                }
+                const selectedDate = new Date(dateStr);
+                const now = new Date();
+                if (selectedDate <= now) {
+                    showAlert('过期日期必须晚于当前时间', 'error');
+                    return;
+                }
+                expireTime = Math.floor(selectedDate.getTime() / 1000);
+                expireDesc = `${selectedDate.toLocaleString('zh-CN')}过期`;
+            }
+
+            let sql = 'INSERT INTO redemptions (user_id, `key`, name, quota, created_time, redeemed_time, used_user_id, deleted_at, expired_time)\nVALUES\n';
+
+            const values = [];
+            generatedKeys = [];
+            for (let i = 1; i <= count; i++) {
+                const key = generateRandomKey(keyPrefix, 32);
+                generatedKeys.push(key);
+                const quota = mode === 'fixed' ? fixedQuota : amountToQuota(getRandomAmount(minAmount, maxAmount));
+                values.push(`(${userId}, '${key}', '${name}', ${quota}, UNIX_TIMESTAMP(), 0, 0, NULL, ${expireTime})`);
+            }
+
+            sql += values.join(',\n') + ';';
+
+            document.getElementById('output').value = sql;
+
+            let alertMsg = `成功生成 ${count} 条SQL插入语句！`;
+            if (mode === 'fixed') {
+                alertMsg += `固定额度: ${document.getElementById('fixedAmount').value} (quota: ${fixedQuota})`;
+            } else {
+                alertMsg += `随机额度区间: ${minAmount} - ${maxAmount}`;
+            }
+            alertMsg += `，${expireDesc}`;
+
+            showAlert(alertMsg, 'success');
+        }
+
+        function copyToClipboard() {
+            const output = document.getElementById('output');
+            if (!output.value) {
+                showAlert('没有可复制的内容，请先生成SQL语句', 'error');
+                return;
+            }
+
+            output.select();
+            document.execCommand('copy');
+            showAlert('SQL语句已复制到剪贴板！', 'success');
+        }
+
+        function copyKeys() {
+            if (generatedKeys.length === 0) {
+                showAlert('没有可复制的Keys，请先生成SQL语句', 'error');
+                return;
+            }
+
+            const keysText = generatedKeys.join('\n');
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = keysText;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            showAlert(`已复制 ${generatedKeys.length} 个Keys到剪贴板！`, 'success');
+        }
+
+        function downloadKeys() {
+            if (generatedKeys.length === 0) {
+                showAlert('没有可下载的Keys，请先生成SQL语句', 'error');
+                return;
+            }
+
+            const name = document.getElementById('name').value.trim();
+            const today = new Date();
+            const dateStr = today.getFullYear() +
+                String(today.getMonth() + 1).padStart(2, '0') +
+                String(today.getDate()).padStart(2, '0');
+            const filename = `${name}_${dateStr}.txt`;
+
+            const keysText = generatedKeys.join('\n');
+            const blob = new Blob([keysText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showAlert(`已下载 ${generatedKeys.length} 个Keys到文件: ${filename}`, 'success');
+        }
+
+        function showAlert(message, type = 'success') {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert ${type} show`;
+
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>
