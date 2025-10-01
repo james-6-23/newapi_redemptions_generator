@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewAPI兑换码 - API生成工具</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* 顶部导航栏 */
+        .top-navbar {
+            background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+            color: white;
+            padding: 16px 32px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .navbar-brand svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .navbar-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-navbar {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-navbar:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        /* 主容器 */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        /* 标签导航 */
+        .tabs-container {
+            background: white;
+            border-radius: 12px;
+            padding: 8px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            display: flex;
+            gap: 8px;
+        }
+
+        .tab-item {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            background: transparent;
+        }
+
+        .tab-item.active {
+            background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+        }
+
+        .tab-item:hover:not(.active) {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        /* 内容区域 - 左右分栏 */
+        .content-wrapper {
+            display: grid;
+            grid-template-columns: 480px 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        @media (max-width: 1200px) {
+            .content-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 左侧表单卡片 */
+        .form-card {
+            background: white;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 24px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-section {
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            font-size: 15px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #334155;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="datetime-local"] {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Noto Sans SC', sans-serif;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #4361ee;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
+        }
+
+        input:hover:not(:focus) {
+            border-color: #cbd5e1;
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* 单选按钮组 */
+        .radio-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .radio-option {
+            position: relative;
+        }
+
+        .radio-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+            color: #64748b;
+        }
+
+        .radio-option input[type="radio"]:checked+.radio-label {
+            background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+            border-color: #4361ee;
+            color: white;
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.25);
+        }
+
+        .radio-label:hover {
+            border-color: #cbd5e1;
+            background: white;
+        }
+
+        .radio-option input[type="radio"]:checked+.radio-label:hover {
+            background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+        }
+
+        /* 按钮 */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+            color: white;
+            box-shadow: 0 4px 16px rgba(67, 97, 238, 0.4);
+            width: 100%;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(67, 97, 238, 0.5);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white;
+            box-shadow: 0 4px 16px rgba(6, 182, 212, 0.4);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(6, 182, 212, 0.5);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(16, 185, 129, 0.5);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        /* 提示信息框 */
+        .info-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-left: 4px solid #3b82f6;
+            padding: 14px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #1e40af;
+            line-height: 1.6;
+        }
+
+        .info-box strong {
+            color: #1e3a8a;
+        }
+
+        /* 帮助文本 */
+        .help-text {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        /* 右侧预览区 */
+        .preview-card {
+            background: white;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+            min-height: 600px;
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .preview-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 进度条 */
+        .progress-container {
+            margin-bottom: 24px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4361ee, #3a0ca3);
+            border-radius: 20px;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(67, 97, 238, 0.5);
+        }
+
+        .progress-text {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 8px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1e293b;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stat-card.success .stat-value {
+            color: #10b981;
+        }
+
+        .stat-card.error .stat-value {
+            color: #ef4444;
+        }
+
+        .stat-card.info .stat-value {
+            color: #3b82f6;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 6px;
+            font-weight: 500;
+        }
+
+        /* 结果输出区 */
+        .output-container {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .output-text {
+            font-family: 'JetBrains Mono', 'SF Mono', monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            color: #e2e8f0;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .output-line {
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.1);
+        }
+
+        .output-line.success {
+            color: #6ee7b7;
+        }
+
+        .output-line.error {
+            color: #fca5a5;
+        }
+
+        .output-line.info {
+            color: #93c5fd;
+        }
+
+        .output-placeholder {
+            color: #64748b;
+            text-align: center;
+            padding: 60px 20px;
+            font-size: 15px;
+        }
+
+        /* 滚动条样式 */
+        .output-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .output-container::-webkit-scrollbar-track {
+            background: #0f172a;
+            border-radius: 10px;
+        }
+
+        .output-container::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 10px;
+        }
+
+        .output-container::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        /* 警告提示 */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert.show {
+            display: flex;
+        }
+
+        .alert.success {
+            background: #dcfce7;
+            color: #166534;
+            border-left: 4px solid #22c55e;
+        }
+
+        .alert.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+
+        /* 隐藏的section */
+        .hidden {
+            display: none;
+        }
+
+        .quota-section {
+            display: none;
+        }
+
+        .quota-section.active {
+            display: block;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .top-navbar {
+                padding: 12px 16px;
+            }
+
+            .navbar-brand {
+                font-size: 16px;
+            }
+
+            .main-container {
+                padding: 16px;
+            }
+
+            .tabs-container {
+                overflow-x: auto;
+                display: flex;
+                flex-wrap: nowrap;
+            }
+
+            .form-card,
+            .preview-card {
+                padding: 20px;
+            }
+
+            .input-row {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn-group .btn {
+                width: 100%;
+            }
+        }
+
+        /* 加载动画 */
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .loading {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="top-navbar">
+        <div class="navbar-brand">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="16" rx="2" />
+                <path d="M7 8h10M7 12h10M7 16h6" />
+            </svg>
+            NewAPI 兑换码生成工具
+        </div>
+        <div class="navbar-actions">
+            <a href="index.html" class="btn-navbar">SQL生成器</a>
+            <a href="https://github.com" target="_blank" class="btn-navbar">GitHub</a>
+        </div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="main-container">
+        <!-- 标签导航 -->
+        <div class="tabs-container">
+            <button class="tab-item active">API生成</button>
+            <button class="tab-item" onclick="window.location.href='index.html'">SQL生成</button>
+        </div>
+
+        <div id="alert" class="alert"></div>
+
+        <!-- 内容区域 -->
+        <div class="content-wrapper">
+            <!-- 左侧表单卡片 -->
+            <div class="form-card">
+                <div class="card-title">
+                    ⚙️ 配置信息
+                </div>
+
+                <!-- API配置 -->
+                <div class="form-section">
+                    <div class="section-header">🔐 API配置</div>
+
+                    <div class="info-box">
+                        <strong>认证说明：</strong> 请先在浏览器中登录 NewAPI 管理后台，Cookie会自动发送。建议将此页面部署到与API相同的域名下。
+                    </div>
+
+                    <div class="form-group">
+                        <label for="apiUrl">API地址</label>
+                        <input type="text" id="apiUrl" value="https://api.kkyyxx.xyz/api/redemption/"
+                            placeholder="https://your-api.com/api/redemption/">
+                        <div class="help-text">NewAPI兑换码生成接口地址</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="userId">管理员 User ID</label>
+                        <input type="number" id="userId" value="1" min="1">
+                        <div class="help-text">通常为 1</div>
+                    </div>
+                </div>
+
+                <!-- 兑换码配置 -->
+                <div class="form-section">
+                    <div class="section-header">🎫 兑换码配置</div>
+
+                    <div class="form-group">
+                        <label for="name">兑换码名称</label>
+                        <input type="text" id="name" placeholder="例如: RedeemCode-2025">
+                        <div class="help-text">用于标识这批兑换码</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="count">生成数量</label>
+                        <input type="number" id="count" value="10" min="1" max="1000">
+                        <div class="help-text">批量生成条数（1-1000）💡 500000 Token = $1</div>
+                    </div>
+                </div>
+
+                <!-- 额度配置 -->
+                <div class="form-section">
+                    <div class="section-header">💰 额度配置</div>
+
+                    <div class="form-group">
+                        <label>额度模式</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" name="quotaMode" id="fixedMode" value="fixed" checked>
+                                <label for="fixedMode" class="radio-label">固定额度</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" name="quotaMode" id="randomMode" value="random">
+                                <label for="randomMode" class="radio-label">随机额度</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="fixedQuotaSection" class="form-group quota-section active">
+                        <label for="fixedAmount">固定额度（$）</label>
+                        <input type="number" id="fixedAmount" value="1" step="0.1" min="0">
+                        <div class="help-text">$1 = 500000 Token</div>
+                    </div>
+
+                    <div id="randomQuotaSection" class="form-group quota-section">
+                        <label>随机额度区间（$）</label>
+                        <div class="input-row">
+                            <div>
+                                <input type="number" id="minAmount" value="1" step="0.1" min="0" placeholder="最小值">
+                                <div class="help-text">最小额度</div>
+                            </div>
+                            <div>
+                                <input type="number" id="maxAmount" value="5" step="0.1" min="0" placeholder="最大值">
+                                <div class="help-text">最大额度</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 过期时间 -->
+                <div class="form-section">
+                    <div class="section-header">⏰ 过期设置</div>
+
+                    <div class="form-group">
+                        <label>过期时间</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" name="expireMode" id="neverExpire" value="never" checked>
+                                <label for="neverExpire" class="radio-label">永不过期</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" name="expireMode" id="daysExpire" value="days">
+                                <label for="daysExpire" class="radio-label">自定义天数</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" name="expireMode" id="dateExpire" value="date">
+                                <label for="dateExpire" class="radio-label">指定日期</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="daysExpireSection" class="form-group quota-section">
+                        <label for="expireDays">过期天数</label>
+                        <input type="number" id="expireDays" value="30" min="1">
+                        <div class="help-text">兑换码将在 <span id="expireDaysPreview">30</span> 天后过期</div>
+                    </div>
+
+                    <div id="dateExpireSection" class="form-group quota-section">
+                        <label for="expireDate">过期日期</label>
+                        <input type="datetime-local" id="expireDate">
+                        <div class="help-text">选择具体的过期时间点</div>
+                    </div>
+                </div>
+
+                <!-- 操作按钮 -->
+                <button id="btnGenerate" class="btn btn-primary" onclick="generateViaAPI()">
+                    🚀 开始生成兑换码
+                </button>
+
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="copyKeys()">📋 复制</button>
+                    <button class="btn btn-success" onclick="downloadKeys()">💾 下载</button>
+                </div>
+            </div>
+
+            <!-- 右侧预览区 -->
+            <div class="preview-card">
+                <div class="preview-header">
+                    <div class="preview-title">
+                        📊 实时结果
+                    </div>
+                </div>
+
+                <!-- 进度条 -->
+                <div id="progressContainer" class="progress-container" style="display: none;">
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div id="progressText" class="progress-text">准备中...</div>
+                </div>
+
+                <!-- 统计信息 -->
+                <div id="statsGrid" class="stats-grid" style="display: none;">
+                    <div class="stat-card success">
+                        <div class="stat-value" id="statSuccess">0</div>
+                        <div class="stat-label">✓ 成功</div>
+                    </div>
+                    <div class="stat-card error">
+                        <div class="stat-value" id="statFailed">0</div>
+                        <div class="stat-label">✗ 失败</div>
+                    </div>
+                    <div class="stat-card info">
+                        <div class="stat-value" id="statTotal">0</div>
+                        <div class="stat-label">📊 总计</div>
+                    </div>
+                </div>
+
+                <!-- 输出区域 -->
+                <div class="output-container" id="outputContainer">
+                    <div class="output-placeholder">
+                        <div style="font-size: 48px; margin-bottom: 16px;">🎫</div>
+                        <div>点击"开始生成兑换码"按钮后</div>
+                        <div>生成结果将实时显示在这里</div>
+                    </div>
+                    <div id="outputText" class="output-text"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let generatedKeys = [];
+        let isGenerating = false;
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function () {
+            // 额度模式切换
+            document.querySelectorAll('input[name="quotaMode"]').forEach(radio => {
+                radio.addEventListener('change', function () {
+                    toggleQuotaMode();
+                });
+            });
+
+            // 过期模式切换
+            document.querySelectorAll('input[name="expireMode"]').forEach(radio => {
+                radio.addEventListener('change', function () {
+                    toggleExpireMode();
+                });
+            });
+
+            // 过期天数实时更新
+            document.getElementById('expireDays')?.addEventListener('input', function () {
+                document.getElementById('expireDaysPreview').textContent = this.value || '0';
+            });
+        });
+
+        function toggleQuotaMode() {
+            const mode = document.querySelector('input[name="quotaMode"]:checked').value;
+            const fixedSection = document.getElementById('fixedQuotaSection');
+            const randomSection = document.getElementById('randomQuotaSection');
+
+            if (mode === 'fixed') {
+                fixedSection.classList.add('active');
+                randomSection.classList.remove('active');
+            } else {
+                fixedSection.classList.remove('active');
+                randomSection.classList.add('active');
+            }
+        }
+
+        function toggleExpireMode() {
+            const mode = document.querySelector('input[name="expireMode"]:checked').value;
+            const daysSection = document.getElementById('daysExpireSection');
+            const dateSection = document.getElementById('dateExpireSection');
+
+            daysSection.classList.remove('active');
+            dateSection.classList.remove('active');
+
+            if (mode === 'days') {
+                daysSection.classList.add('active');
+            } else if (mode === 'date') {
+                dateSection.classList.add('active');
+            }
+        }
+
+        function amountToQuota(amount) {
+            return Math.round(amount * 500000);
+        }
+
+        function showAlert(message, type = 'success') {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert ${type} show`;
+
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 5000);
+        }
+
+        function addOutputLine(text, type = '') {
+            const outputText = document.getElementById('outputText');
+            const line = document.createElement('div');
+            line.className = `output-line ${type}`;
+            line.textContent = text;
+            outputText.appendChild(line);
+
+            const container = document.getElementById('outputContainer');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function clearOutput() {
+            const outputText = document.getElementById('outputText');
+            outputText.innerHTML = '';
+            document.querySelector('.output-placeholder').style.display = 'none';
+        }
+
+        async function generateViaAPI() {
+            if (isGenerating) {
+                showAlert('正在生成中，请等待...', 'error');
+                return;
+            }
+
+            const apiUrl = document.getElementById('apiUrl').value.trim();
+            const userId = document.getElementById('userId').value;
+            const name = document.getElementById('name').value.trim();
+            const count = parseInt(document.getElementById('count').value);
+
+            // 验证
+            if (!apiUrl) {
+                showAlert('请填写API地址', 'error');
+                return;
+            }
+            if (!name) {
+                showAlert('请填写兑换码名称', 'error');
+                return;
+            }
+            if (!count || count < 1 || count > 1000) {
+                showAlert('生成数量必须在1-1000之间', 'error');
+                return;
+            }
+
+            // 计算配额
+            const quotaMode = document.querySelector('input[name="quotaMode"]:checked').value;
+            let quota;
+
+            if (quotaMode === 'fixed') {
+                const fixedAmount = parseFloat(document.getElementById('fixedAmount').value);
+                if (isNaN(fixedAmount) || fixedAmount < 0) {
+                    showAlert('请输入有效的固定额度', 'error');
+                    return;
+                }
+                quota = amountToQuota(fixedAmount);
+            } else {
+                const minAmount = parseFloat(document.getElementById('minAmount').value);
+                const maxAmount = parseFloat(document.getElementById('maxAmount').value);
+
+                if (isNaN(minAmount) || isNaN(maxAmount) || minAmount < 0 || maxAmount < 0) {
+                    showAlert('请输入有效的额度区间', 'error');
+                    return;
+                }
+                if (minAmount > maxAmount) {
+                    showAlert('最小额度不能大于最大额度', 'error');
+                    return;
+                }
+            }
+
+            // 计算过期时间
+            let expireTime = 0;
+            const expireMode = document.querySelector('input[name="expireMode"]:checked').value;
+
+            if (expireMode === 'days') {
+                const days = parseInt(document.getElementById('expireDays').value);
+                if (isNaN(days) || days < 1) {
+                    showAlert('请输入有效的过期天数', 'error');
+                    return;
+                }
+                expireTime = Math.floor(Date.now() / 1000) + (days * 24 * 60 * 60);
+            } else if (expireMode === 'date') {
+                const dateStr = document.getElementById('expireDate').value;
+                if (!dateStr) {
+                    showAlert('请选择过期日期', 'error');
+                    return;
+                }
+                const selectedDate = new Date(dateStr);
+                if (selectedDate <= new Date()) {
+                    showAlert('过期日期必须晚于当前时间', 'error');
+                    return;
+                }
+                expireTime = Math.floor(selectedDate.getTime() / 1000);
+            }
+
+            // 开始生成
+            isGenerating = true;
+            generatedKeys = [];
+
+            const btnGenerate = document.getElementById('btnGenerate');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const statsGrid = document.getElementById('statsGrid');
+            const statSuccess = document.getElementById('statSuccess');
+            const statFailed = document.getElementById('statFailed');
+            const statTotal = document.getElementById('statTotal');
+
+            btnGenerate.disabled = true;
+            btnGenerate.textContent = '⏳ 生成中...';
+            progressContainer.style.display = 'block';
+            statsGrid.style.display = 'grid';
+            clearOutput();
+
+            let successCount = 0;
+            let failCount = 0;
+
+            statTotal.textContent = count;
+
+            // 批量生成
+            for (let i = 0; i < count; i++) {
+                try {
+                    // 如果是随机额度，每次生成不同配额
+                    let currentQuota = quota;
+                    if (quotaMode === 'random') {
+                        const minAmount = parseFloat(document.getElementById('minAmount').value);
+                        const maxAmount = parseFloat(document.getElementById('maxAmount').value);
+                        const randomAmount = Math.random() * (maxAmount - minAmount) + minAmount;
+                        currentQuota = amountToQuota(randomAmount);
+                    }
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'new-api-user': userId,
+                            'Cache-Control': 'no-store'
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            quota: currentQuota,
+                            count: 1,
+                            expired_time: expireTime,
+                            name: name
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success && data.data && data.data.length > 0) {
+                        const key = data.data[0];
+                        generatedKeys.push(key);
+                        successCount++;
+                        addOutputLine(`✓ [${i + 1}/${count}] ${key}`, 'success');
+                        statSuccess.textContent = successCount;
+                    } else {
+                        failCount++;
+                        const errorMsg = data.message || '未知错误';
+                        addOutputLine(`✗ [${i + 1}/${count}] 失败: ${errorMsg}`, 'error');
+                        statFailed.textContent = failCount;
+                    }
+
+                } catch (error) {
+                    failCount++;
+                    addOutputLine(`✗ [${i + 1}/${count}] 网络错误: ${error.message}`, 'error');
+                    statFailed.textContent = failCount;
+                }
+
+                // 更新进度
+                const progress = ((i + 1) / count * 100).toFixed(1);
+                progressFill.style.width = progress + '%';
+                progressText.textContent = `进度: ${i + 1}/${count} (${progress}%)`;
+
+                // 短暂延迟
+                if (i < count - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+            }
+
+            // 完成
+            isGenerating = false;
+            btnGenerate.disabled = false;
+            btnGenerate.textContent = '🚀 开始生成兑换码';
+
+            addOutputLine('', '');
+            addOutputLine('='.repeat(60), 'info');
+            addOutputLine(`✨ 生成完成！成功: ${successCount}, 失败: ${failCount}`, 'info');
+
+            if (successCount > 0) {
+                progressText.textContent = `✅ 成功生成 ${successCount} 个兑换码`;
+                showAlert(`成功生成 ${successCount} 个兑换码！`, 'success');
+            } else {
+                progressText.textContent = `❌ 所有请求都失败了`;
+                showAlert('生成失败，请检查API配置和Cookie认证', 'error');
+            }
+        }
+
+        function copyKeys() {
+            if (generatedKeys.length === 0) {
+                showAlert('没有可复制的兑换码，请先生成', 'error');
+                return;
+            }
+
+            const keysText = generatedKeys.join('\n');
+            navigator.clipboard.writeText(keysText).then(() => {
+                showAlert(`已复制 ${generatedKeys.length} 个兑换码到剪贴板！`, 'success');
+            }).catch(() => {
+                const tempTextArea = document.createElement('textarea');
+                tempTextArea.value = keysText;
+                document.body.appendChild(tempTextArea);
+                tempTextArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempTextArea);
+                showAlert(`已复制 ${generatedKeys.length} 个兑换码到剪贴板！`, 'success');
+            });
+        }
+
+        function downloadKeys() {
+            if (generatedKeys.length === 0) {
+                showAlert('没有可下载的兑换码，请先生成', 'error');
+                return;
+            }
+
+            const name = document.getElementById('name').value.trim() || 'redemption';
+            const today = new Date();
+            const dateStr = today.getFullYear() +
+                String(today.getMonth() + 1).padStart(2, '0') +
+                String(today.getDate()).padStart(2, '0') + '_' +
+                String(today.getHours()).padStart(2, '0') +
+                String(today.getMinutes()).padStart(2, '0');
+            const filename = `${name}_${dateStr}.txt`;
+
+            const keysText = generatedKeys.join('\n');
+            const blob = new Blob([keysText], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showAlert(`已下载 ${generatedKeys.length} 个兑换码到: ${filename}`, 'success');
+        }
+    </script>
+</body>
+
+</html>
