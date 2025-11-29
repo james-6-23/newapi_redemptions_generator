@@ -4,728 +4,1174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NewAPI兑换码生成器</title>
+    <title>NewAPI 兑换码生成器</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;900&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --secondary: #ec4899;
+            --bg-color: #0f172a;
+            --surface: rgba(30, 41, 59, 0.7);
+            --surface-hover: rgba(51, 65, 85, 0.8);
+            --border: rgba(255, 255, 255, 0.1);
+            --border-highlight: rgba(255, 255, 255, 0.2);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --glass-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+        }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #0f2027 0%, #203a43 25%, #2c5364 50%, #1e3c72 75%, #2a5298 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
             min-height: 100vh;
-            padding: 30px 20px;
-            animation: gradientShift 25s ease infinite;
-            background-size: 400% 400%;
-            position: relative;
-            overflow-x: hidden;
             display: flex;
-            align-items: center;
             justify-content: center;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            text-rendering: optimizeLegibility;
+            align-items: center;
+            padding: 40px 20px;
+            overflow-x: hidden;
+            position: relative;
         }
 
-        body::before {
-            content: '';
+        /* --- 1. 质感升级: 噪点背景 & 光球 --- */
+        .bg-fixed {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background:
-                radial-gradient(circle at 20% 50%, rgba(66, 153, 225, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(72, 187, 120, 0.12) 0%, transparent 50%),
-                radial-gradient(circle at 40% 20%, rgba(99, 179, 237, 0.1) 0%, transparent 50%);
+            inset: 0;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        /* 噪点纹理 - 增加胶片质感 */
+        .bg-noise {
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+            z-index: 1;
             pointer-events: none;
-            animation: float 15s ease-in-out infinite;
         }
 
-        @keyframes gradientShift {
+        /* 动态光球 */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.5;
+            animation: float 20s infinite ease-in-out;
+        }
 
-            0%,
-            100% {
-                background-position: 0% 50%;
-            }
+        .orb-1 {
+            top: -10%;
+            left: -10%;
+            width: 50vw;
+            height: 50vw;
+            background: radial-gradient(circle, #4f46e5 0%, transparent 70%);
+        }
 
-            50% {
-                background-position: 100% 50%;
-            }
+        .orb-2 {
+            bottom: -20%;
+            right: -10%;
+            width: 50vw;
+            height: 50vw;
+            background: radial-gradient(circle, #ec4899 0%, transparent 70%);
+            animation-delay: -5s;
+        }
+        
+        .orb-3 {
+             top: 40%;
+             left: 40%;
+             width: 30vw;
+             height: 30vw;
+             background: radial-gradient(circle, #06b6d4 0%, transparent 70%);
+             animation-delay: -10s;
+             opacity: 0.3;
         }
 
         @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0px);
-            }
-
-            50% {
-                transform: translateY(-20px);
-            }
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.95); }
         }
 
+        /* --- 主容器 --- */
         .container {
-            max-width: 1400px;
             width: 100%;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(30px) saturate(180%);
-            -webkit-backdrop-filter: blur(30px) saturate(180%);
-            border-radius: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow:
-                0 30px 90px rgba(0, 0, 0, 0.25),
-                inset 0 1px 1px rgba(255, 255, 255, 0.5),
-                0 0 0 1px rgba(255, 255, 255, 0.1);
-            padding: 40px 50px;
-            animation: slideUp 0.8s ease-out;
+            max-width: 960px;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 48px;
+            box-shadow: var(--glass-shadow);
             position: relative;
+            z-index: 10;
+            /* 顶部高光边框效果 */
+            box-shadow: 
+                0 0 0 1px rgba(255, 255, 255, 0.05),
+                0 1px 0 0 rgba(255, 255, 255, 0.1) inset,
+                0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        .container::before {
-            content: '';
-            position: absolute;
-            inset: -2px;
-            border-radius: 30px;
-            padding: 2px;
-            background: linear-gradient(135deg,
-                    rgba(255, 255, 255, 0.4) 0%,
-                    rgba(255, 255, 255, 0.1) 50%,
-                    rgba(255, 255, 255, 0.4) 100%);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            opacity: 0.5;
-            pointer-events: none;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(50px) scale(0.98);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
+        /* --- 标题 --- */
+        header {
+            text-align: center;
+            margin-bottom: 32px;
         }
 
         h1 {
-            color: #ffffff;
-            margin-bottom: 10px;
-            text-align: center;
-            font-size: 42px;
-            font-weight: 900;
-            letter-spacing: -0.5px;
-            text-shadow:
-                0 2px 10px rgba(0, 0, 0, 0.3),
-                0 4px 20px rgba(66, 153, 225, 0.4),
-                0 0 60px rgba(99, 179, 237, 0.2);
-            animation: titleGlow 3s ease-in-out infinite;
-            line-height: 1.2;
-        }
-
-        @keyframes titleGlow {
-
-            0%,
-            100% {
-                text-shadow:
-                    0 2px 10px rgba(0, 0, 0, 0.3),
-                    0 4px 20px rgba(66, 153, 225, 0.4),
-                    0 0 60px rgba(99, 179, 237, 0.2);
-            }
-
-            50% {
-                text-shadow:
-                    0 2px 10px rgba(0, 0, 0, 0.3),
-                    0 4px 30px rgba(66, 153, 225, 0.6),
-                    0 0 80px rgba(99, 179, 237, 0.3);
-            }
+            font-size: 2.75rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #fff 20%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.03em;
         }
 
         .subtitle {
-            text-align: center;
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 16px;
-            margin-bottom: 30px;
-            font-weight: 400;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            letter-spacing: 0.5px;
-            line-height: 1.5;
+            color: var(--text-muted);
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .tag-badge {
+            background: rgba(99, 102, 241, 0.1);
+            color: #818cf8;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+         /* --- Tab 导航 --- */
+         .nav-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 32px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 4px;
+            border-radius: 16px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-item {
+            padding: 10px 24px;
+            border-radius: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-item:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        /* --- 视图切换 --- */
+        .view-section {
+            display: none;
+            animation: fadeInView 0.4s var(--ease-out);
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeInView {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- 表单布局 --- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+
+        .grid-full { grid-column: span 2; }
+
+        @media (max-width: 768px) {
+            .container { padding: 24px; }
+            .grid { grid-template-columns: 1fr; gap: 24px; }
+            .grid-full { grid-column: span 1; }
+            h1 { font-size: 2rem; }
         }
 
         .form-group {
-            margin-bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         label {
-            display: block;
-            margin-bottom: 10px;
-            color: rgba(255, 255, 255, 0.95);
+            font-size: 0.875rem;
             font-weight: 600;
-            font-size: 15px;
-            letter-spacing: 0.5px;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            line-height: 1.4;
+            color: #e2e8f0;
+            margin-left: 2px;
+        }
+
+        /* --- 输入框美化 --- */
+        .input-wrapper {
+            position: relative;
+            transition: transform 0.2s;
+        }
+        
+        .input-wrapper:focus-within {
+            transform: translateY(-1px);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+            transition: color 0.3s;
+            width: 18px;
+            height: 18px;
         }
 
         input[type="text"],
         input[type="number"],
-        input[type="datetime-local"],
-        textarea {
+        input[type="datetime-local"] {
             width: 100%;
-            padding: 14px 18px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 14px;
-            font-size: 15px;
-            font-family: 'Noto Sans SC', sans-serif;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(10px);
-            color: #1a202c;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 16px 14px 46px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.95rem;
             font-weight: 500;
-        }
-
-        input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-            filter: invert(0.2);
-            cursor: pointer;
-        }
-
-        input[type="text"]::placeholder,
-        input[type="number"]::placeholder,
-        input[type="datetime-local"]::placeholder,
-        textarea::placeholder {
-            color: rgba(0, 0, 0, 0.4);
-        }
-
-        input[type="text"]:hover,
-        input[type="number"]:hover,
-        input[type="datetime-local"]:hover,
-        textarea:hover {
-            border-color: rgba(255, 255, 255, 0.5);
-            background: rgba(255, 255, 255, 0.35);
-            box-shadow: 0 8px 32px rgba(66, 153, 225, 0.2);
-        }
-
-        input[type="text"]:focus,
-        input[type="number"]:focus,
-        input[type="datetime-local"]:focus,
-        textarea:focus {
+            transition: all 0.2s var(--ease-out);
             outline: none;
-            border-color: rgba(255, 255, 255, 0.8);
-            background: rgba(255, 255, 255, 0.45);
-            box-shadow: 0 12px 40px rgba(66, 153, 225, 0.3), 0 0 0 4px rgba(99, 179, 237, 0.2);
-            transform: translateY(-2px);
+            /* 顶部内阴影增加深度 */
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        input[type="number"] { font-family: 'JetBrains Mono', monospace; }
+
+        input:hover {
+            background: var(--surface-hover);
+            border-color: rgba(255,255,255,0.2);
         }
 
-        .input-row {
-            display: grid;
-            grid-template-columns: 1.5fr 1fr;
-            gap: 20px;
+        input:focus {
+            background: rgba(30, 41, 59, 0.9);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25), inset 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        @media (max-width: 768px) {
-            .input-row {
-                grid-template-columns: 1fr;
-            }
+        input:focus ~ .input-icon { color: var(--primary); }
+
+        /* --- 2. 丝滑动画: 可折叠卡片 --- */
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            /* 卡片顶部高光 */
+            box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.08) inset;
         }
 
-        .radio-group {
+        .card-header {
             display: flex;
-            gap: 15px;
-            margin-top: 12px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
-        .radio-group label {
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #f1f5f9;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+        }
+
+        /* 分段控制器 */
+        .segmented-control {
+            display: flex;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 4px;
+            border-radius: 10px;
+            user-select: none;
+        }
+
+        .segmented-control label {
+            position: relative;
+            cursor: pointer;
+            padding: 6px 14px;
+            font-size: 0.85rem;
             font-weight: 500;
-            font-size: 15px;
-            cursor: pointer;
-            padding: 12px 20px;
-            border-radius: 14px;
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            color: rgba(0, 0, 0, 0.8);
+            color: var(--text-muted);
+            margin: 0;
+            border-radius: 8px;
+            transition: all 0.3s;
+            z-index: 1;
         }
 
-        .radio-group label:hover {
-            background: rgba(255, 255, 255, 0.35);
-            border-color: rgba(255, 255, 255, 0.5);
-            box-shadow: 0 8px 32px rgba(66, 153, 225, 0.2);
-            transform: translateY(-2px);
-        }
+        .segmented-control input { display: none; }
 
-        .radio-group input[type="radio"]:checked+span {
-            color: #ffffff;
-            font-weight: 600;
+        .segmented-control input:checked + span {
+            color: white;
+            background: var(--surface-hover);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
-
-        .radio-group label:has(input[type="radio"]:checked) {
-            background: rgba(66, 153, 225, 0.7);
-            backdrop-filter: blur(15px);
-            border-color: rgba(255, 255, 255, 0.6);
-            box-shadow: 0 12px 40px rgba(66, 153, 225, 0.4);
-        }
-
-        .radio-group input[type="radio"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            accent-color: #ffffff;
-        }
-
-        .quota-section {
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .quota-section.active {
+        
+        .segmented-control span {
             display: block;
+            padding: 6px 12px;
+            border-radius: 6px;
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .segmented-control input:checked + span {
+            background-color: var(--primary);
+            color: #fff;
         }
 
-        .quota-range {
+        /* 动画容器：实现 height: auto 的过渡 */
+        .expand-wrapper {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.4s var(--ease-out), opacity 0.3s ease;
+            opacity: 0;
         }
 
-        .info-box {
-            background: rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(15px);
-            border-left: 4px solid rgba(72, 187, 120, 0.8);
-            padding: 14px 20px;
-            border-radius: 14px;
-            margin-bottom: 25px;
-            font-size: 15px;
-            color: rgba(0, 0, 0, 0.85);
+        .expand-wrapper.open {
+            grid-template-rows: 1fr;
+            opacity: 1;
+        }
+
+        .expand-inner {
+            overflow: hidden;
+            min-height: 0; /* 必须 */
+        }
+        
+        /* 避免内边距导致的动画跳动，将padding放在内部元素或使用gap */
+        .expand-content {
+            padding-top: 4px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px;
+        }
+
+
+        /* Chips 快捷按钮 */
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .chip {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
             font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'JetBrains Mono', sans-serif;
+        }
+
+        .chip:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .chip:active { transform: translateY(0); }
+
+        /* 区间输入 */
+        .range-inputs {
             display: flex;
             align-items: center;
             gap: 12px;
-            box-shadow: 0 8px 32px rgba(66, 153, 225, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            line-height: 1.6;
         }
+        .separator { color: var(--text-muted); font-weight: bold; }
 
-        .info-box::before {
-            content: "💡";
-            font-size: 22px;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-            flex-shrink: 0;
-        }
-
-        .info-box code {
-            background: rgba(0, 0, 0, 0.15);
-            color: rgba(0, 0, 0, 0.9);
-            font-weight: 600;
-        }
-
-        button {
-            background: linear-gradient(135deg, rgba(66, 153, 225, 0.85) 0%, rgba(49, 130, 206, 0.85) 100%);
-            backdrop-filter: blur(10px);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            padding: 13px 28px;
-            border-radius: 14px;
-            font-size: 15px;
-            font-weight: 600;
-            font-family: 'Noto Sans SC', sans-serif;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 8px 24px rgba(66, 153, 225, 0.4);
-            position: relative;
-            overflow: hidden;
-        }
-
-        button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.5s;
-        }
-
-        button:hover::before {
-            left: 100%;
-        }
-
-        button:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 12px 36px rgba(66, 153, 225, 0.6);
-            border-color: rgba(255, 255, 255, 0.6);
-        }
-
-        button:active {
-            transform: translateY(-1px) scale(0.98);
-            box-shadow: 0 6px 20px rgba(66, 153, 225, 0.4);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, rgba(72, 187, 120, 0.85) 0%, rgba(56, 161, 105, 0.85) 100%);
-            box-shadow: 0 8px 24px rgba(72, 187, 120, 0.4);
-        }
-
-        .btn-secondary:hover {
-            box-shadow: 0 12px 36px rgba(72, 187, 120, 0.5);
-        }
-
-        .btn-secondary:active {
-            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
-        }
-
-        .btn-group {
-            margin-top: 25px;
+        /* --- 按钮区域 --- */
+        .actions {
             display: flex;
-            gap: 10px;
-            justify-content: center;
+            gap: 16px;
+            margin-top: 48px;
             flex-wrap: wrap;
         }
 
-        .btn-download {
-            background: linear-gradient(135deg, rgba(237, 137, 54, 0.85) 0%, rgba(214, 88, 86, 0.85) 100%);
-            box-shadow: 0 8px 24px rgba(237, 137, 54, 0.4);
-        }
-
-        .btn-download:hover {
-            box-shadow: 0 12px 36px rgba(237, 137, 54, 0.5);
-        }
-
-        .btn-download:active {
-            box-shadow: 0 6px 20px rgba(237, 137, 54, 0.4);
-        }
-
-        .btn-copy-keys {
-            background: linear-gradient(135deg, rgba(159, 122, 234, 0.85) 0%, rgba(130, 103, 216, 0.85) 100%);
-            box-shadow: 0 8px 24px rgba(159, 122, 234, 0.4);
-        }
-
-        .btn-copy-keys:hover {
-            box-shadow: 0 12px 36px rgba(159, 122, 234, 0.5);
-        }
-
-        .btn-copy-keys:active {
-            box-shadow: 0 6px 20px rgba(159, 122, 234, 0.4);
-        }
-
-        .btn-expire-preset {
-            background: linear-gradient(135deg, rgba(99, 179, 237, 0.7) 0%, rgba(66, 153, 225, 0.7) 100%);
-            backdrop-filter: blur(10px);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            padding: 8px 16px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 600;
-            font-family: 'Noto Sans SC', sans-serif;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
-        }
-
-        .btn-expire-preset:hover {
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 6px 20px rgba(66, 153, 225, 0.5);
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-
-        .btn-expire-preset:active {
-            transform: translateY(0) scale(0.98);
-            box-shadow: 0 2px 8px rgba(66, 153, 225, 0.3);
-        }
-
-        .output-area {
-            margin-top: 30px;
-            padding-top: 25px;
-            border-top: 2px solid rgba(255, 255, 255, 0.2);
-        }
-
-        textarea {
-            min-height: 240px;
-            font-family: 'JetBrains Mono', 'SF Mono', 'Monaco', 'Consolas', 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 1.8;
-            resize: vertical;
-            font-weight: 500;
-            letter-spacing: 0.3px;
-            font-variant-ligatures: common-ligatures;
-        }
-
-        .help-text {
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.75);
-            margin-top: 6px;
-            display: flex;
+        .btn {
+            position: relative;
+            display: inline-flex;
             align-items: center;
-            gap: 5px;
-            font-weight: 400;
-            line-height: 1.5;
-        }
-
-        .help-text::before {
-            content: "ℹ️";
-            font-size: 12px;
-            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
-            flex-shrink: 0;
-        }
-
-        /* 代码字体样式 */
-        .code-text,
-        code,
-        kbd {
-            font-family: 'JetBrains Mono', 'SF Mono', 'Monaco', 'Consolas', monospace;
-            font-size: 0.95em;
-            font-weight: 500;
-            letter-spacing: 0.2px;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 2px 6px;
-            border-radius: 4px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .alert {
-            padding: 14px 20px;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px 28px;
             border-radius: 14px;
-            margin-bottom: 20px;
-            display: none;
-            align-items: center;
-            gap: 10px;
-            font-size: 14px;
-            font-weight: 500;
-            animation: slideDown 0.4s ease;
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s var(--ease-out);
+            border: 1px solid transparent;
+            overflow: hidden;
+            flex: 1;
+            min-width: 140px;
         }
 
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px) scale(0.95);
-            }
+        /* 按钮点击波纹效果需要JS，这里用简单的 active 缩放 */
+        .btn:active { transform: scale(0.98); }
 
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4), inset 0 1px 0 rgba(255,255,255,0.2);
         }
 
-        .alert.success {
-            background: rgba(195, 230, 203, 0.85);
-            color: #155724;
-            box-shadow: 0 8px 24px rgba(21, 87, 36, 0.2);
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.5), inset 0 1px 0 rgba(255,255,255,0.2);
         }
 
-        .alert.success::before {
-            content: "✓";
-            font-size: 18px;
-            font-weight: bold;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: #e2e8f0;
+            border-color: rgba(255, 255, 255, 0.1);
         }
 
-        .alert.error {
-            background: rgba(245, 198, 203, 0.85);
-            color: #721c24;
-            box-shadow: 0 8px 24px rgba(114, 28, 36, 0.2);
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
         }
 
-        .alert.error::before {
-            content: "⚠";
-            font-size: 18px;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        /* Loading 状态 */
+        .btn.loading {
+            color: transparent;
+            pointer-events: none;
         }
-
-        .alert.show {
-            display: flex;
+        .btn.loading::after {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            left: 50%;
+            top: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .input-wrapper {
+        /* --- 3. 细节打磨: 输出框 & 滚动条 --- */
+        .output-section {
+            margin-top: 32px;
             position: relative;
         }
+        
+        .output-label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .clear-btn {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .clear-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
 
-        .input-wrapper input:focus~.focus-indicator {
+        textarea {
+            width: 100%;
+            height: 240px;
+            background: #0b101e; /* 更深的背景 */
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            color: #a5b4fc; /* 代码高亮色 */
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.7;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus { border-color: var(--primary); }
+
+        /* 定制滚动条 */
+        textarea::-webkit-scrollbar { width: 10px; }
+        textarea::-webkit-scrollbar-track { background: #0b101e; border-radius: 0 16px 16px 0; }
+        textarea::-webkit-scrollbar-thumb { 
+            background: rgba(255, 255, 255, 0.15); 
+            border-radius: 5px; 
+            border: 2px solid #0b101e; /* 制造padding效果 */
+        }
+        textarea::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
+        
+        .history-list::-webkit-scrollbar { width: 6px; }
+        .history-list::-webkit-scrollbar-track { background: transparent; }
+        .history-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+        .history-list::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+        /* 辅助信息 */
+        .hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+            margin-left: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .hint code {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #cbd5e1;
+        }
+
+        /* --- Toast 通知 --- */
+        .toast {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 99px;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 100;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
             opacity: 1;
+        }
+        
+         /* --- 历史记录列表优化 --- */
+        .history-container {
+             /* 确保历史记录视图高度足够 */
+        }
+        
+        .history-header {
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+             margin-bottom: 20px;
+             padding: 0 4px;
+        }
+        
+        .history-stats {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+        
+        .history-item {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 20px;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .history-item:hover {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .history-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .history-info h4 {
+            font-size: 1.1rem;
+            color: #f1f5f9;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .history-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            align-items: center;
+        }
+        
+        .meta-badge {
+            background: rgba(255,255,255,0.06);
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .btn-xs {
+            padding: 8px 16px;
+            font-size: 0.8rem;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            color: var(--text-muted);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+        }
+
+        .btn-xs:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        .btn-xs.delete:hover {
+            background: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+        }
+        
+        .empty-state-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 0;
+            color: var(--text-muted);
+        }
+        
+        .empty-icon {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.2;
         }
     </style>
 </head>
 
 <body>
+    <div class="bg-fixed">
+        <div class="bg-noise"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
     <div class="container">
-        <h1>NewAPI兑换码生成器</h1>
-        <div class="subtitle">快速生成批量兑换码 SQL 插入语句</div>
+        <header>
+            <h1>NewAPI 兑换码生成器</h1>
+            <div class="subtitle">
+                <span class="tag-badge">TOOL</span>
+                批量生成 SQL 插入语句的优雅方案
+            </div>
+        </header>
 
-        <div id="alert" class="alert success"></div>
-
-        <div class="info-box">
-            提示：<code>500000Token
-            </code> = <code>$1</code>
+        <!-- 导航切换 -->
+        <div class="nav-tabs">
+            <button class="nav-item active" onclick="switchMainView('generator')" id="tab-generator">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2v8"></path><path d="M12 18v4"></path><path d="M4.93 4.93l1.41 1.41"></path><path d="M17.66 17.66l1.41 1.41"></path><path d="M2 12h8"></path><path d="M18 12h4"></path><path d="M4.93 19.07l1.41-1.41"></path><path d="M17.66 6.34l1.41-1.41"></path>
+                </svg>
+                生成器
+            </button>
+            <button class="nav-item" onclick="switchMainView('history')" id="tab-history">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                历史记录
+            </button>
         </div>
 
-        <div class="form-group">
-            <div class="input-row">
-                <div>
-                    <label for="name">Name</label>
-                    <input type="text" id="name" value="" placeholder="例如: RedeemCode-KYX">
-                    <div class="help-text">兑换码名称</div>
+        <!-- 视图 1: 生成器 -->
+        <div id="viewGenerator" class="view-section active">
+            <div class="grid">
+                <!-- 基础信息 -->
+                <div class="form-group">
+                    <label>兑换码名称</label>
+                    <div class="input-wrapper">
+                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 7h-9"></path><path d="M14 17H5"></path><circle cx="17" cy="17" r="3"></circle><circle cx="7" cy="7" r="3"></circle>
+                        </svg>
+                        <input type="text" id="name" placeholder="">
+                    </div>
                 </div>
-                <div>
-                    <label for="count">生成数量</label>
-                    <input type="number" id="count" value="50" min="1" max="1000" placeholder="1-1000">
-                    <div class="help-text">批量生成条数</div>
+
+                <div class="form-group">
+                    <label>生成数量</label>
+                    <div class="input-wrapper">
+                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        <input type="number" id="count" value="50" min="1" max="1000">
+                    </div>
+                </div>
+
+                <div class="form-group grid-full">
+                    <label>Key 前缀</label>
+                    <div class="input-wrapper">
+                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.778-7.778zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
+                        </svg>
+                                            <input type="text" id="keyPrefix" placeholder="可选 (如 API)" oninput="handlePrefixInput(this)">
+                                        </div>
+                                        <div class="hint">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                            预览: <code id="keyPreview">API...</code> (32位唯一码)
+                                        </div>                </div>
+
+                <!-- 额度设置卡片 -->
+                <div class="grid-full card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--primary)">
+                                <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                            </svg>
+                            额度设置
+                        </div>
+                        <div class="segmented-control">
+                            <label>
+                                <input type="radio" name="quotaMode" value="fixed" checked onchange="toggleQuotaMode()">
+                                <span>固定</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="quotaMode" value="random" onchange="toggleQuotaMode()">
+                                <span>随机</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 固定额度 (默认展开) -->
+                    <div id="fixedQuotaWrapper" class="expand-wrapper open">
+                        <div class="expand-inner">
+                            <div class="expand-content">
+                                <div class="input-wrapper">
+                                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path><line x1="12" y1="18" x2="12" y2="6"></line>
+                                    </svg>
+                                    <input type="number" id="fixedAmount" value="1" min="0" step="0.5" placeholder="输入金额">
+                                </div>
+                                <div class="chips">
+                                    <div class="chip" onclick="setFixedAmount(1)">$1</div>
+                                    <div class="chip" onclick="setFixedAmount(5)">$5</div>
+                                    <div class="chip" onclick="setFixedAmount(10)">$10</div>
+                                    <div class="chip" onclick="setFixedAmount(50)">$50</div>
+                                    <div class="chip" onclick="setFixedAmount(100)">$100</div>
+                                </div>
+                                <div class="hint">1 USD = 500,000 Token</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 随机额度 -->
+                    <div id="randomQuotaWrapper" class="expand-wrapper">
+                        <div class="expand-inner">
+                            <div class="expand-content">
+                                <div class="range-inputs">
+                                    <div class="input-wrapper" style="flex:1">
+                                        <input type="number" id="minAmount" value="1" placeholder="Min ($)">
+                                    </div>
+                                    <span class="separator">~</span>
+                                    <div class="input-wrapper" style="flex:1">
+                                        <input type="number" id="maxAmount" value="5" placeholder="Max ($)">
+                                    </div>
+                                </div>
+                                 <div class="hint">为每个 Key 分配区间内的随机额度</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 过期设置卡片 -->
+                <div class="grid-full card">
+                    <div class="card-header">
+                        <div class="card-title">
+                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--secondary)">
+                                <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            过期时间
+                        </div>
+                        <div class="segmented-control">
+                            <label>
+                                <input type="radio" name="expireMode" value="never" checked onchange="toggleExpireMode()">
+                                <span>永久</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="expireMode" value="days" onchange="toggleExpireMode()">
+                                <span>天数</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="expireMode" value="date" onchange="toggleExpireMode()">
+                                <span>日期</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                     <!-- 永久 -->
+                     <div id="neverExpireWrapper" class="expand-wrapper open">
+                         <div class="expand-inner">
+                             <div class="expand-content">
+                                 <div class="hint" style="margin-top:0">兑换码将永久有效</div>
+                             </div>
+                         </div>
+                     </div>
+
+                    <!-- 天数 -->
+                    <div id="daysExpireWrapper" class="expand-wrapper">
+                         <div class="expand-inner">
+                            <div class="expand-content">
+                                <div class="input-wrapper">
+                                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M5 22h14"></path><path d="M5 2h14"></path><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path>
+                                    </svg>
+                                    <input type="number" id="expireDays" value="30" placeholder="有效天数">
+                                </div>
+                                <div class="chips">
+                                    <div class="chip" onclick="setExpireDays(7)">7天</div>
+                                    <div class="chip" onclick="setExpireDays(30)">30天</div>
+                                    <div class="chip" onclick="setExpireDays(90)">90天</div>
+                                    <div class="chip" onclick="setExpireDays(365)">1年</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 日期 -->
+                    <div id="dateExpireWrapper" class="expand-wrapper">
+                         <div class="expand-inner">
+                            <div class="expand-content">
+                                <div class="input-wrapper">
+                                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+                                    </svg>
+                                    <input type="datetime-local" id="expireDate">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="form-group">
-            <label for="keyPrefix">Key前缀</label>
-            <input type="text" id="keyPrefix" value="" placeholder="例如: NK, API, CODE" maxlength="12"
-                oninput="updateKeyPreview()">
-            <div class="help-text">
-                Key总长度固定 <code>32字符</code>，当前分配: 前缀(<code id="prefixLen">2</code>) + 随机数(<code id="randomLen">18</code>)
-                + 时间戳(8) + 计数器(4)
+            <!-- 按钮区域 -->
+            <div class="actions">
+                <button id="btnGenerate" class="btn btn-primary" onclick="generateSQLWithAnim()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.778-7.778zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
+                    </svg>
+                    生成 SQL
+                </button>
+                <button class="btn btn-secondary" onclick="copyToClipboard()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    复制 SQL
+                </button>
+                <button class="btn btn-secondary" onclick="copyKeys()">
+                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    复制 Keys
+                </button>
+                 <button class="btn btn-secondary" onclick="downloadKeys()">
+                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    下载 Keys
+                </button>
             </div>
-        </div>
 
-        <div class="form-group">
-            <label>额度模式</label>
-            <div class="radio-group">
-                <label>
-                    <input type="radio" name="quotaMode" value="fixed" checked onchange="toggleQuotaMode()">
-                    <span>固定额度</span>
-                </label>
-                <label>
-                    <input type="radio" name="quotaMode" value="random" onchange="toggleQuotaMode()">
-                    <span>随机额度</span>
-                </label>
-            </div>
-        </div>
-
-        <div id="fixedQuotaSection" class="form-group quota-section active">
-            <label for="fixedAmount">固定额度（$）</label>
-            <input type="number" id="fixedAmount" value="1" step="5" min="0" placeholder="例如: 1">
-            <div class="help-text"><code>$1</code> = <code>500000Token</code></div>
-        </div>
-
-        <div id="randomQuotaSection" class="form-group quota-section">
-            <label>随机额度区间（$）</label>
-            <div class="quota-range">
-                <div>
-                    <input type="number" id="minAmount" value="5" step="5" min="0" placeholder="最小值">
-                    <div class="help-text">最小额度（$）</div>
+            <div class="output-section">
+                <div class="output-label-row">
+                    <label>生成的 SQL 语句</label>
+                    <button class="clear-btn" onclick="clearOutput()">清空</button>
                 </div>
-                <div>
-                    <input type="number" id="maxAmount" value="10" step="5" min="0" placeholder="最大值">
-                    <div class="help-text">最大额度（$）</div>
-                </div>
+                <textarea id="output" readonly placeholder="点击“生成 SQL”按钮查看结果..."></textarea>
             </div>
         </div>
 
-        <div class="form-group">
-            <label>过期时间</label>
-            <div class="radio-group">
-                <label>
-                    <input type="radio" name="expireMode" value="never" checked onchange="toggleExpireMode()">
-                    <span>永不过期</span>
-                </label>
-                <label>
-                    <input type="radio" name="expireMode" value="days" onchange="toggleExpireMode()">
-                    <span>自定义天数</span>
-                </label>
-                <label>
-                    <input type="radio" name="expireMode" value="date" onchange="toggleExpireMode()">
-                    <span>指定日期</span>
-                </label>
-            </div>
-        </div>
-
-        <div id="daysExpireSection" class="form-group quota-section">
-            <label for="expireDays">过期天数</label>
-            <div class="input-row">
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button type="button" class="btn-expire-preset" onclick="setExpireDays(7)">7天</button>
-                    <button type="button" class="btn-expire-preset" onclick="setExpireDays(30)">30天</button>
-                    <button type="button" class="btn-expire-preset" onclick="setExpireDays(90)">90天</button>
-                    <button type="button" class="btn-expire-preset" onclick="setExpireDays(180)">180天</button>
-                    <button type="button" class="btn-expire-preset" onclick="setExpireDays(365)">1年</button>
-                </div>
-            </div>
-            <input type="number" id="expireDays" value="30" min="1" placeholder="输入天数">
-            <div class="help-text">兑换码将在 <code id="expireDaysPreview">30</code> 天后过期</div>
-        </div>
-
-        <div id="dateExpireSection" class="form-group quota-section">
-            <label for="expireDate">过期日期</label>
-            <input type="datetime-local" id="expireDate" placeholder="选择过期时间">
-            <div class="help-text">选择具体的过期时间点</div>
-        </div>
-
-        <div class="btn-group">
-            <button onclick="generateSQL()">生成SQL语句</button>
-            <button class="btn-secondary" onclick="copyToClipboard()">复制SQL语句</button>
-            <button class="btn-copy-keys" onclick="copyKeys()">复制Keys</button>
-            <button class="btn-download" onclick="downloadKeys()">下载Keys到文件</button>
-        </div>
-
-        <div class="output-area">
-            <div class="form-group">
-                <label for="output">生成的SQL语句</label>
-                <textarea id="output" readonly placeholder="点击" 生成SQL语句"按钮生成..."></textarea>
+        <!-- 视图 2: 历史记录 -->
+        <div id="viewHistory" class="view-section history-container">
+             <div class="history-header">
+                 <div class="history-stats">
+                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                    </svg>
+                     已保存 <span id="historyCount">0</span> 条记录
+                 </div>
+                 <button class="btn-xs delete" onclick="confirmClearHistory()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    清空记录
+                 </button>
+             </div>
+            <div id="historyList" class="history-list">
+                <!-- 动态生成 -->
             </div>
         </div>
     </div>
 
+    <!-- Toast 通知 -->
+    <div id="toast" class="toast">
+        <div id="toastIcon"></div>
+        <span id="toastMsg">操作成功</span>
+    </div>
+
     <script>
         let generatedKeys = [];
+        const MAX_HISTORY = 20;
 
-        /**
-         * 混合增强方案 - 三重唯一性保障（固定32位长度）
-         * 总长度固定为 32 字符，根据前缀长度动态分配
-         * 1. 前缀：用户自定义（建议2-4字符）
-         * 2. 随机数：剩余长度 - 12（加密级）
-         * 3. 时间戳：8字符（36进制，覆盖约8300年）
-         * 4. 计数器：4字符（36进制，同毫秒内167万组合）
-         */
+        // --- 视图切换逻辑 ---
+        function switchMainView(viewName) {
+            // 更新 Tab 状态
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${viewName}`).classList.add('active');
+
+            // 更新视图显示
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            
+            if (viewName === 'generator') {
+                document.getElementById('viewGenerator').classList.add('active');
+            } else {
+                document.getElementById('viewHistory').classList.add('active');
+                HistoryManager.render(); // 切换时刷新列表
+            }
+        }
+
+        // --- 历史记录管理 ---
+        const HistoryManager = {
+            save: (record) => {
+                try {
+                    let history = JSON.parse(localStorage.getItem('redemption_history') || '[]');
+                    history.unshift(record);
+                    if (history.length > MAX_HISTORY) history.pop();
+                    localStorage.setItem('redemption_history', JSON.stringify(history));
+                    // 这里不需要立即 Render，因为如果在生成器视图，下次切换时会自动 Render
+                } catch (e) {
+                    console.error('Storage full or error', e);
+                    showToast('保存记录失败: 存储空间不足', 'error');
+                }
+            },
+            
+            load: () => {
+                return JSON.parse(localStorage.getItem('redemption_history') || '[]');
+            },
+
+            clear: () => {
+                localStorage.removeItem('redemption_history');
+                HistoryManager.render();
+                showToast('历史记录已清空');
+            },
+
+            delete: (id) => {
+                let history = HistoryManager.load();
+                history = history.filter(item => item.id !== id);
+                localStorage.setItem('redemption_history', JSON.stringify(history));
+                HistoryManager.render();
+                showToast('记录已删除');
+            },
+
+            render: () => {
+                const history = HistoryManager.load();
+                const container = document.getElementById('historyList');
+                const countSpan = document.getElementById('historyCount');
+                
+                if(countSpan) countSpan.textContent = history.length;
+
+                if (history.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state-container">
+                            <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="12" y1="18" x2="12" y2="12"></line>
+                                <line x1="9" y1="15" x2="15" y2="15"></line>
+                            </svg>
+                            <p>暂无生成记录</p>
+                        </div>`;
+                    return;
+                }
+
+                container.innerHTML = history.map(item => `
+                    <div class="history-item">
+                        <div class="history-main">
+                            <div class="history-info">
+                                <h4>${escapeHtml(item.name)}</h4>
+                                <div class="history-meta">
+                                    <span class="meta-badge">${new Date(item.timestamp).toLocaleString()}</span>
+                                    <span class="meta-badge">${item.count} 个</span>
+                                    <span class="meta-badge" style="color:#818cf8">${item.desc}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="history-actions">
+                            <button class="btn-xs" onclick="copyHistorySQL('${item.id}')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                复制 SQL
+                            </button>
+                            <button class="btn-xs" onclick="copyHistoryKeys('${item.id}')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                复制 Keys
+                            </button>
+                            <button class="btn-xs" onclick="downloadHistoryKeys('${item.id}')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                下载
+                            </button>
+                            <button class="btn-xs delete" onclick="HistoryManager.delete('${item.id}')" style="margin-left: auto;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                删除
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        };
+
+        // 辅助函数
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function confirmClearHistory() {
+            if(confirm('确定要清空所有历史记录吗？')) {
+                HistoryManager.clear();
+            }
+        }
+
+        // 历史记录操作动作
+        function copyHistorySQL(id) {
+            const item = HistoryManager.load().find(i => i.id === id);
+            if(item && item.sql) {
+                navigator.clipboard.writeText(item.sql).then(() => {
+                    showToast('SQL 语句已复制到剪贴板');
+                }).catch(() => {
+                    showToast('复制失败，请手动复制', 'error');
+                });
+            }
+        }
+
+        function copyHistoryKeys(id) {
+            const item = HistoryManager.load().find(i => i.id === id);
+            if(item && item.keys) {
+                navigator.clipboard.writeText(item.keys.join('\n')).then(() => {
+                    showToast(`已复制 ${item.keys.length} 个 Key`);
+                });
+            }
+        }
+
+        function downloadHistoryKeys(id) {
+            const item = HistoryManager.load().find(i => i.id === id);
+            if(item && item.keys) {
+                 const filename = `${item.name}_${new Date(item.timestamp).toISOString().slice(0,10).replace(/-/g,'')}.txt`;
+                 const blob = new Blob([item.keys.join('\n')], { type: 'text/plain' });
+                 const url = URL.createObjectURL(blob);
+                 const a = document.createElement('a');
+                 a.href = url;
+                 a.download = filename;
+                 document.body.appendChild(a);
+                 a.click();
+                 document.body.removeChild(a);
+                 URL.revokeObjectURL(url);
+            }
+        }
+
+        // 核心生成逻辑
         function generateRandomKey(prefix = '', targetLength = 32) {
             const prefixLength = prefix.length;
-
-            // 为时间戳和计数器保留固定长度
-            const timestampLength = 8;  // 36进制时间戳
-            const counterLength = 4;     // 36进制计数器
-
-            // 计算随机数部分的长度
+            const timestampLength = 8;
+            const counterLength = 4;
             const randomLength = targetLength - prefixLength - timestampLength - counterLength;
 
-            if (randomLength < 8) {
-                console.warn(`前缀过长！建议前缀不超过 ${targetLength - timestampLength - counterLength - 8} 字符`);
-            }
-
-            // 1. 使用crypto.getRandomValues生成加密级真随机数
-            const actualRandomLength = Math.max(8, randomLength); // 至少8位
+            const actualRandomLength = Math.max(8, randomLength);
             const randomBytes = new Uint8Array(Math.ceil(actualRandomLength / 2));
             crypto.getRandomValues(randomBytes);
             const randomPart = Array.from(randomBytes)
@@ -733,89 +1179,139 @@
                 .join('')
                 .substring(0, actualRandomLength);
 
-            // 2. 毫秒级时间戳（36进制）
             const timestamp = Date.now();
             const timestampBase36 = timestamp.toString(36).padStart(timestampLength, '0').substring(0, timestampLength);
-
-            // 3. 性能计数器（36进制，4位）
-            const perfCounter = Math.floor(performance.now() * 1000) % 1679616; // 36^4
+            const perfCounter = Math.floor(performance.now() * 1000) % 1679616;
             const counterBase36 = perfCounter.toString(36).padStart(counterLength, '0');
 
-            // 组合并确保总长度为32
             const key = `${prefix}${randomPart}${timestampBase36}${counterBase36}`;
             return key.substring(0, targetLength).padEnd(targetLength, '0');
         }
 
+        // --- 交互逻辑 ---
+
+        // 切换额度模式 (带动画)
         function toggleQuotaMode() {
             const mode = document.querySelector('input[name="quotaMode"]:checked').value;
-            const fixedSection = document.getElementById('fixedQuotaSection');
-            const randomSection = document.getElementById('randomQuotaSection');
+            const fixedWrapper = document.getElementById('fixedQuotaWrapper');
+            const randomWrapper = document.getElementById('randomQuotaWrapper');
 
             if (mode === 'fixed') {
-                fixedSection.classList.add('active');
-                randomSection.classList.remove('active');
+                fixedWrapper.classList.add('open');
+                randomWrapper.classList.remove('open');
             } else {
-                fixedSection.classList.remove('active');
-                randomSection.classList.add('active');
+                fixedWrapper.classList.remove('open');
+                randomWrapper.classList.add('open');
             }
         }
 
+        // 切换过期模式 (带动画)
         function toggleExpireMode() {
             const mode = document.querySelector('input[name="expireMode"]:checked').value;
-            const daysSection = document.getElementById('daysExpireSection');
-            const dateSection = document.getElementById('dateExpireSection');
+            const neverWrapper = document.getElementById('neverExpireWrapper');
+            const daysWrapper = document.getElementById('daysExpireWrapper');
+            const dateWrapper = document.getElementById('dateExpireWrapper');
+            
+            neverWrapper.classList.remove('open');
+            daysWrapper.classList.remove('open');
+            dateWrapper.classList.remove('open');
 
-            daysSection.classList.remove('active');
-            dateSection.classList.remove('active');
-
-            if (mode === 'days') {
-                daysSection.classList.add('active');
+            if (mode === 'never') {
+                neverWrapper.classList.add('open');
+            } else if (mode === 'days') {
+                daysWrapper.classList.add('open');
             } else if (mode === 'date') {
-                dateSection.classList.add('active');
+                dateWrapper.classList.add('open');
             }
+        }
+
+        function setFixedAmount(amount) {
+            document.getElementById('fixedAmount').value = amount;
+            // 简单的点击反馈动画
+            const input = document.getElementById('fixedAmount');
+            input.style.transform = "scale(1.02)";
+            setTimeout(() => input.style.transform = "scale(1)", 150);
         }
 
         function setExpireDays(days) {
             document.getElementById('expireDays').value = days;
-            updateExpireDaysPreview();
         }
 
-        function updateExpireDaysPreview() {
-            const days = document.getElementById('expireDays').value;
-            document.getElementById('expireDaysPreview').textContent = days || '0';
+        function handlePrefixInput(input) {
+            const maxLength = 20;
+            if (input.value.length > maxLength) {
+                input.value = input.value.slice(0, maxLength);
+                showToast('Key 前缀最多允许 20 个字符', 'error');
+            }
+            updateKeyPreview();
         }
 
         function updateKeyPreview() {
             const prefix = document.getElementById('keyPrefix').value;
-            const prefixLen = prefix.length;
-            const randomLen = Math.max(8, 32 - prefixLen - 8 - 4); // 最少8位随机数
-
-            document.getElementById('prefixLen').textContent = prefixLen;
-            document.getElementById('randomLen').textContent = randomLen;
-
-            // 如果前缀过长，显示警告
-            if (prefixLen > 12) {
-                showAlert('前缀建议不超过12字符，以保证足够的随机性', 'error');
-            }
+            const preview = generateRandomKey(prefix, 32);
+            document.getElementById('keyPreview').textContent = preview.substring(0, prefix.length + 8) + '...';
         }
-
-        // 监听输入框变化，实时更新预览
-        document.addEventListener('DOMContentLoaded', function () {
-            const expireDaysInput = document.getElementById('expireDays');
-            if (expireDaysInput) {
-                expireDaysInput.addEventListener('input', updateExpireDaysPreview);
-            }
-
-            // 初始化 key 预览
-            updateKeyPreview();
-        });
 
         function amountToQuota(amount) {
             return Math.round(amount * 500000);
         }
 
-        function getRandomAmount(min, max) {
-            return Math.random() * (max - min) + min;
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            const msgSpan = document.getElementById('toastMsg');
+            const iconDiv = document.getElementById('toastIcon');
+            
+            let iconHtml = '';
+            if(type === 'success') {
+                 iconHtml = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+            } else {
+                 iconHtml = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+            }
+            
+            iconDiv.innerHTML = iconHtml;
+            msgSpan.textContent = msg;
+            toast.className = 'toast show';
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        function clearOutput() {
+            document.getElementById('output').value = '';
+            generatedKeys = [];
+            showToast('已清空内容');
+        }
+
+        // 带 Loading 效果的生成函数
+        function generateSQLWithAnim() {
+            const btn = document.getElementById('btnGenerate');
+            
+            // 验证逻辑前置
+            const name = document.getElementById('name').value.trim();
+            const count = parseInt(document.getElementById('count').value);
+            
+             if (!name) {
+                showToast('请输入兑换码名称', 'error');
+                document.getElementById('name').focus();
+                return;
+            }
+             if (count < 1 || count > 1000) {
+                showToast('生成数量必须在 1-1000 之间', 'error');
+                return;
+            }
+
+            // 进入 Loading
+            btn.classList.add('loading');
+            
+            // 模拟计算延迟，提升体验
+            setTimeout(() => {
+                generateSQL();
+                btn.classList.remove('loading');
+                
+                // 滚动到结果区
+                document.querySelector('.output-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 600);
         }
 
         function generateSQL() {
@@ -825,23 +1321,13 @@
             const userId = 1;
             const mode = document.querySelector('input[name="quotaMode"]:checked').value;
             const expireMode = document.querySelector('input[name="expireMode"]:checked').value;
-
-            if (!name || !count) {
-                showAlert('请填写所有必填字段', 'error');
-                return;
-            }
-
-            if (count < 1 || count > 1000) {
-                showAlert('生成数量必须在1-1000之间', 'error');
-                return;
-            }
-
+            
             let minAmount, maxAmount, fixedQuota;
 
             if (mode === 'fixed') {
                 const fixedAmount = parseFloat(document.getElementById('fixedAmount').value);
                 if (isNaN(fixedAmount) || fixedAmount < 0) {
-                    showAlert('请输入有效的固定额度', 'error');
+                    showToast('请输入有效的固定额度', 'error');
                     return;
                 }
                 fixedQuota = amountToQuota(fixedAmount);
@@ -849,115 +1335,98 @@
                 minAmount = parseFloat(document.getElementById('minAmount').value);
                 maxAmount = parseFloat(document.getElementById('maxAmount').value);
 
-                if (isNaN(minAmount) || isNaN(maxAmount) || minAmount < 0 || maxAmount < 0) {
-                    showAlert('请输入有效的额度区间', 'error');
-                    return;
-                }
-
-                if (minAmount > maxAmount) {
-                    showAlert('最小额度不能大于最大额度', 'error');
+                if (isNaN(minAmount) || isNaN(maxAmount) || minAmount > maxAmount) {
+                    showToast('请输入有效的额度区间', 'error');
                     return;
                 }
             }
 
-            // 计算过期时间
+            // 过期时间逻辑
             let expireTime = 0;
-            let expireDesc = '永不过期';
-
             if (expireMode === 'days') {
                 const days = parseInt(document.getElementById('expireDays').value);
                 if (isNaN(days) || days < 1) {
-                    showAlert('请输入有效的过期天数', 'error');
+                    showToast('请输入有效的过期天数', 'error');
                     return;
                 }
                 expireTime = Math.floor(Date.now() / 1000) + (days * 24 * 60 * 60);
-                expireDesc = `${days}天后过期`;
             } else if (expireMode === 'date') {
                 const dateStr = document.getElementById('expireDate').value;
                 if (!dateStr) {
-                    showAlert('请选择过期日期', 'error');
+                    showToast('请选择过期日期', 'error');
                     return;
                 }
-                const selectedDate = new Date(dateStr);
-                const now = new Date();
-                if (selectedDate <= now) {
-                    showAlert('过期日期必须晚于当前时间', 'error');
-                    return;
-                }
-                expireTime = Math.floor(selectedDate.getTime() / 1000);
-                expireDesc = `${selectedDate.toLocaleString('zh-CN')}过期`;
+                expireTime = Math.floor(new Date(dateStr).getTime() / 1000);
             }
 
             let sql = 'INSERT INTO redemptions (user_id, `key`, name, quota, created_time, redeemed_time, used_user_id, deleted_at, expired_time)\nVALUES\n';
-
             const values = [];
             generatedKeys = [];
-            for (let i = 1; i <= count; i++) {
+
+            for (let i = 0; i < count; i++) {
                 const key = generateRandomKey(keyPrefix, 32);
                 generatedKeys.push(key);
-                const quota = mode === 'fixed' ? fixedQuota : amountToQuota(getRandomAmount(minAmount, maxAmount));
+                
+                let quota = fixedQuota;
+                if (mode === 'random') {
+                    const randomVal = Math.random() * (maxAmount - minAmount) + minAmount;
+                    quota = amountToQuota(randomVal);
+                }
+                
                 values.push(`(${userId}, '${key}', '${name}', ${quota}, UNIX_TIMESTAMP(), 0, 0, NULL, ${expireTime})`);
             }
 
             sql += values.join(',\n') + ';';
-
             document.getElementById('output').value = sql;
 
-            let alertMsg = `成功生成 ${count} 条SQL插入语句！`;
-            if (mode === 'fixed') {
-                alertMsg += `固定额度: ${document.getElementById('fixedAmount').value} (quota: ${fixedQuota})`;
-            } else {
-                alertMsg += `随机额度区间: ${minAmount} - ${maxAmount}`;
-            }
-            alertMsg += `，${expireDesc}`;
+            // 保存到历史记录
+            const desc = mode === 'fixed' ? `固定 $${document.getElementById('fixedAmount').value}` : `随机 $${minAmount}-${maxAmount}`;
+            HistoryManager.save({
+                id: Date.now().toString(36) + Math.random().toString(36).substr(2),
+                timestamp: Date.now(),
+                name: name,
+                count: count,
+                desc: desc,
+                keys: [...generatedKeys], // 创建副本
+                sql: sql
+            });
 
-            showAlert(alertMsg, 'success');
+            showToast(`成功生成 ${count} 个兑换码！`);
         }
 
         function copyToClipboard() {
             const output = document.getElementById('output');
             if (!output.value) {
-                showAlert('没有可复制的内容，请先生成SQL语句', 'error');
+                showToast('请先生成内容', 'error');
                 return;
             }
-
             output.select();
             document.execCommand('copy');
-            showAlert('SQL语句已复制到剪贴板！', 'success');
+            showToast('已复制 SQL 到剪贴板');
         }
 
         function copyKeys() {
             if (generatedKeys.length === 0) {
-                showAlert('没有可复制的Keys，请先生成SQL语句', 'error');
+                showToast('请先生成内容', 'error');
                 return;
             }
-
             const keysText = generatedKeys.join('\n');
-            const tempTextArea = document.createElement('textarea');
-            tempTextArea.value = keysText;
-            document.body.appendChild(tempTextArea);
-            tempTextArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempTextArea);
-
-            showAlert(`已复制 ${generatedKeys.length} 个Keys到剪贴板！`, 'success');
+            navigator.clipboard.writeText(keysText).then(() => {
+                 showToast(`已复制 ${generatedKeys.length} 个 Key`);
+            });
         }
-
-        function downloadKeys() {
+        
+         function downloadKeys() {
             if (generatedKeys.length === 0) {
-                showAlert('没有可下载的Keys，请先生成SQL语句', 'error');
+                showToast('请先生成内容', 'error');
                 return;
             }
 
-            const name = document.getElementById('name').value.trim();
-            const today = new Date();
-            const dateStr = today.getFullYear() +
-                String(today.getMonth() + 1).padStart(2, '0') +
-                String(today.getDate()).padStart(2, '0');
-            const filename = `${name}_${dateStr}.txt`;
+            const name = document.getElementById('name').value.trim() || 'redemptions';
+            const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            const filename = `${name}_${today}.txt`;
 
-            const keysText = generatedKeys.join('\n');
-            const blob = new Blob([keysText], { type: 'text/plain' });
+            const blob = new Blob([generatedKeys.join('\n')], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -967,17 +1436,14 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
 
-            showAlert(`已下载 ${generatedKeys.length} 个Keys到文件: ${filename}`, 'success');
+            showToast('下载已开始');
         }
-
-        function showAlert(message, type = 'success') {
-            const alert = document.getElementById('alert');
-            alert.textContent = message;
-            alert.className = `alert ${type} show`;
-
-            setTimeout(() => {
-                alert.classList.remove('show');
-            }, 3000);
+        
+        // 初始化
+        updateKeyPreview();
+        // 如果本地没有历史记录，初始化为空数组，避免报错
+        if(!localStorage.getItem('redemption_history')) {
+            localStorage.setItem('redemption_history', '[]');
         }
     </script>
 </body>
