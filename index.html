@@ -809,6 +809,21 @@
                                             预览: <code id="keyPreview">API...</code> (32位唯一码)
                                         </div>                </div>
 
+                <!-- 数据库类型选择 -->
+                <div class="form-group grid-full">
+                    <label>数据库类型</label>
+                    <div class="segmented-control" style="width: fit-content;">
+                        <label>
+                            <input type="radio" name="dbType" value="mysql" checked>
+                            <span>MySQL</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="dbType" value="pgsql">
+                            <span>PostgreSQL</span>
+                        </label>
+                    </div>
+                </div>
+
                 <!-- 额度设置卡片 -->
                 <div class="grid-full card">
                     <div class="card-header">
@@ -1359,28 +1374,48 @@
                 expireTime = Math.floor(new Date(dateStr).getTime() / 1000);
             }
 
-            let sql = 'INSERT INTO redemptions (user_id, `key`, name, quota, created_time, redeemed_time, used_user_id, deleted_at, expired_time)\nVALUES\n';
+            const dbType = document.querySelector('input[name="dbType"]:checked').value;
+            let sql = '';
             const values = [];
             generatedKeys = [];
 
-            for (let i = 0; i < count; i++) {
-                const key = generateRandomKey(keyPrefix, 32);
-                generatedKeys.push(key);
-                
-                let quota = fixedQuota;
-                if (mode === 'random') {
-                    const randomVal = Math.random() * (maxAmount - minAmount) + minAmount;
-                    quota = amountToQuota(randomVal);
+            if (dbType === 'mysql') {
+                sql = 'INSERT INTO redemptions (user_id, `key`, name, quota, created_time, redeemed_time, used_user_id, deleted_at, expired_time)\nVALUES\n';
+                for (let i = 0; i < count; i++) {
+                    const key = generateRandomKey(keyPrefix, 32);
+                    generatedKeys.push(key);
+                    
+                    let quota = fixedQuota;
+                    if (mode === 'random') {
+                        const randomVal = Math.random() * (maxAmount - minAmount) + minAmount;
+                        quota = amountToQuota(randomVal);
+                    }
+                    
+                    values.push(`(${userId}, '${key}', '${name}', ${quota}, UNIX_TIMESTAMP(), 0, 0, NULL, ${expireTime})`);
                 }
-                
-                values.push(`(${userId}, '${key}', '${name}', ${quota}, UNIX_TIMESTAMP(), 0, 0, NULL, ${expireTime})`);
+                sql += values.join(',\n') + ';';
+            } else {
+                // PostgreSQL
+                sql = 'INSERT INTO redemptions (user_id, key, name, quota, created_time, redeemed_time, used_user_id, deleted_at, expired_time)\nVALUES\n';
+                for (let i = 0; i < count; i++) {
+                    const key = generateRandomKey(keyPrefix, 32);
+                    generatedKeys.push(key);
+                    
+                    let quota = fixedQuota;
+                    if (mode === 'random') {
+                        const randomVal = Math.random() * (maxAmount - minAmount) + minAmount;
+                        quota = amountToQuota(randomVal);
+                    }
+                    
+                    values.push(`(${userId}, '${key}', '${name}', ${quota}, EXTRACT(EPOCH FROM NOW())::INTEGER, 0, 0, NULL, ${expireTime})`);
+                }
+                sql += values.join(',\n') + ';';
             }
-
-            sql += values.join(',\n') + ';';
             document.getElementById('output').value = sql;
 
             // 保存到历史记录
-            const desc = mode === 'fixed' ? `固定 $${document.getElementById('fixedAmount').value}` : `随机 $${minAmount}-${maxAmount}`;
+            const dbLabel = dbType === 'mysql' ? 'MySQL' : 'PostgreSQL';
+            const desc = `${dbLabel} | ` + (mode === 'fixed' ? `固定 $${document.getElementById('fixedAmount').value}` : `随机 $${minAmount}-${maxAmount}`);
             HistoryManager.save({
                 id: Date.now().toString(36) + Math.random().toString(36).substr(2),
                 timestamp: Date.now(),
